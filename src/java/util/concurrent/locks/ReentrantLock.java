@@ -106,8 +106,7 @@ import java.util.Collection;
 public class ReentrantLock implements Lock, java.io.Serializable {
     private static final long serialVersionUID = 7373984872572414699L;
     /** Synchronizer providing all implementation mechanics */
-    /**ReentrantLock 的核心组件  AQS*/
-    private final Sync sync;
+    private final Sync sync; /**ReentrantLock 的核心组件  AQS*/
 
     /**
      * Base of synchronization control for this lock. Subclassed
@@ -129,15 +128,15 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          */
         final boolean nonfairTryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
-            int c = getState();
-            if (c == 0) {
-                if (compareAndSetState(0, acquires)) {
+            int c = getState();/** 获取当前线程的状态 */
+            if (c == 0) { /** 表示该线程前面没有线程等待 */
+                if (compareAndSetState(0, acquires)) { /** CAS 尝试修改Sync的状态, 和第一次立即尝试获取锁的操作一致*/
                     setExclusiveOwnerThread(current);
                     return true;
                 }
             }
             else if (current == getExclusiveOwnerThread()) {
-                int nextc = c + acquires;
+                int nextc = c + acquires; /** 如果当前的独占线程已经是当前线程，则表示已经获得运行权限 */
                 if (nextc < 0) // overflow
                     throw new Error("Maximum lock count exceeded");
                 setState(nextc);
@@ -203,17 +202,15 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
          */
-        /** 加锁操作, 立即尝试获取锁，如果失败了，则进去正常的获取锁操作*/
-        final void lock() {
-            /** CAS操作尝试获取锁*/
-            if (compareAndSetState(0, 1))
-                setExclusiveOwnerThread(Thread.currentThread());
+        final void lock() { /** 加锁操作, 立即尝试获取锁，如果失败了，则进去正常的获取锁操作*/
+            if (compareAndSetState(0, 1)) /** CAS操作尝试获取锁 Sync方法*/
+                setExclusiveOwnerThread(Thread.currentThread());  /** CAS设置成功，表示成功修改了Sync的状态, 去设置独占线程为当前线程*/
             else
-                acquire(1);
+                acquire(1); /** CAS失败，执行正常的获取锁操作,会调用下面的 tryAcquire*/
         }
 
         protected final boolean tryAcquire(int acquires) {
-            return nonfairTryAcquire(acquires);
+            return nonfairTryAcquire(acquires);  /** 尝试获取锁操作 */
         }
     }
 

@@ -538,7 +538,7 @@ public abstract class AbstractQueuedSynchronizer
      * @return current state value
      */
     protected final int getState() {
-        return state;
+        return state; /** 当前线程的状态，volatile 修饰的变量*/
     }
 
     /**
@@ -563,7 +563,7 @@ public abstract class AbstractQueuedSynchronizer
      */
     protected final boolean compareAndSetState(int expect, int update) {
         // See below for intrinsics setup to support this
-        return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
+        return unsafe.compareAndSwapInt(this, stateOffset, expect, update);  /** CAS设置状态偏移 */
     }
 
     // Queuing utilities
@@ -1195,6 +1195,7 @@ public abstract class AbstractQueuedSynchronizer
      *        can represent anything you like.
      */
     public final void acquire(int arg) {
+        /** 尝试获取锁 */
         if (!tryAcquire(arg) &&
             acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
             selfInterrupt();
