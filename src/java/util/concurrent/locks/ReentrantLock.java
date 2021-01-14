@@ -106,6 +106,7 @@ import java.util.Collection;
 public class ReentrantLock implements Lock, java.io.Serializable {
     private static final long serialVersionUID = 7373984872572414699L;
     /** Synchronizer providing all implementation mechanics */
+    /**ReentrantLock 的核心组件  AQS*/
     private final Sync sync;
 
     /**
@@ -202,7 +203,9 @@ public class ReentrantLock implements Lock, java.io.Serializable {
          * Performs lock.  Try immediate barge, backing up to normal
          * acquire on failure.
          */
+        /** 加锁操作, 立即尝试获取锁，如果失败了，则进去正常的获取锁操作*/
         final void lock() {
+            /** CAS操作尝试获取锁*/
             if (compareAndSetState(0, 1))
                 setExclusiveOwnerThread(Thread.currentThread());
             else
