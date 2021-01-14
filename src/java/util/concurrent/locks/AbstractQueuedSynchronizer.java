@@ -1195,8 +1195,7 @@ public abstract class AbstractQueuedSynchronizer
      *        can represent anything you like.
      */
     public final void acquire(int arg) {
-        /** 尝试获取锁 */
-        if (!tryAcquire(arg) &&
+        if (!tryAcquire(arg) && /** 尝试获取锁 */
             acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
             selfInterrupt();
     }
