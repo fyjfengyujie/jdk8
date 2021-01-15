@@ -129,30 +129,30 @@ public class ReentrantLock implements Lock, java.io.Serializable {
         final boolean nonfairTryAcquire(int acquires) {
             final Thread current = Thread.currentThread();
             int c = getState();/** 获取当前线程的状态 */
-            if (c == 0) { /** 表示该线程前面没有线程等待 */
+            if (c == 0) { /** 表示当前没有执行CAS操作，Sync的状态还没有变黄 */
                 if (compareAndSetState(0, acquires)) { /** CAS 尝试修改Sync的状态, 和第一次立即尝试获取锁的操作一致*/
-                    setExclusiveOwnerThread(current);
+                    setExclusiveOwnerThread(current);  /** 获取锁成功，设置独占线程为当前线程 */
                     return true;
                 }
             }
-            else if (current == getExclusiveOwnerThread()) {
+            else if (current == getExclusiveOwnerThread()) {  /** 此时独占线程就是当前线程, 这里表示的锁的重入 */
                 int nextc = c + acquires; /** 如果当前的独占线程已经是当前线程，则表示已经获得运行权限 */
-                if (nextc < 0) // overflow
+                if (nextc < 0) // overflow /** 表示锁的重入数量太多*/
                     throw new Error("Maximum lock count exceeded");
-                setState(nextc);
+                setState(nextc); /** 设置锁的状态，表示锁的重入次数 */
                 return true;
             }
             return false;
         }
 
         protected final boolean tryRelease(int releases) {
-            int c = getState() - releases;
+            int c = getState() - releases; /** 释放 releases层锁 */
             if (Thread.currentThread() != getExclusiveOwnerThread())
                 throw new IllegalMonitorStateException();
             boolean free = false;
-            if (c == 0) {
+            if (c == 0) { /** 表示该线程不在占用锁，所有的锁已经释放*/
                 free = true;
-                setExclusiveOwnerThread(null);
+                setExclusiveOwnerThread(null); /** 清空独占线程*/
             }
             setState(c);
             return free;
@@ -232,7 +232,7 @@ public class ReentrantLock implements Lock, java.io.Serializable {
             final Thread current = Thread.currentThread();
             int c = getState();
             if (c == 0) {
-                if (!hasQueuedPredecessors() &&
+                if (!hasQueuedPredecessors() && /** 判断该线程节点前面还有没有其他线程节点*/
                     compareAndSetState(0, acquires)) {
                     setExclusiveOwnerThread(current);
                     return true;
